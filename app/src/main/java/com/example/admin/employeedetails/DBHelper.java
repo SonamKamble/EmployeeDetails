@@ -56,22 +56,22 @@ public class DBHelper {
         mDbHelper = new DatabaseHelper(mCtx);
     }
 
-    public DBHelper open() throws SQLException {
-        mDb = mDbHelper.getWritableDatabase();
-        return this;
-    }
 
     public void close() {
         mDbHelper.close();
     }
 
-    public void insertEmpDetails(Employee employee) {
+    public boolean insertEmpDetails(Employee employee) {
+        mDb=mDbHelper.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put(EMP_PHOTO, Utility.getBytes(employee.getBitmap()));
         cv.put(EMP_NAME, employee.getName());
         cv.put(EMP_AGE, employee.getAge());
-        mDb.insert(EMPLOYEES_TABLE, null, cv);
-
+        long result=mDb.insert(EMPLOYEES_TABLE, null, cv);
+        if(result==-1)
+            return false;
+        else
+            return true;
     }
 
     public Employee retriveEmpDetails() throws SQLException {
@@ -80,7 +80,7 @@ public class DBHelper {
         if (cur.moveToFirst()) {
             byte[] blob = cur.getBlob(cur.getColumnIndex(EMP_PHOTO));
             String name = cur.getString(cur.getColumnIndex(EMP_NAME));
-            int age = cur.getInt(cur.getColumnIndex(EMP_AGE));
+            String age = cur.getString(cur.getColumnIndex(EMP_AGE));
             cur.close();
             return new Employee(Utility.getPhoto(blob), name, age);
         }

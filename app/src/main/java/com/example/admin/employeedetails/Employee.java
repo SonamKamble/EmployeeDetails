@@ -8,9 +8,9 @@ import android.graphics.Bitmap;
 public class Employee {
     private Bitmap bmp;
     private String name;
-    private int age;
+    private String age;
 
-    public Employee(Bitmap b, String n, int k) {
+    public Employee(Bitmap b, String n, String k) {
         bmp = b;
         name = n;
         age = k;
@@ -24,7 +24,7 @@ public class Employee {
         return name;
     }
 
-    public int getAge() {
+    public String getAge() {
         return age;
     }
 }

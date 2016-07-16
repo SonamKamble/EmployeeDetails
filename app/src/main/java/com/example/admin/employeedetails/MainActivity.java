@@ -30,52 +30,60 @@ public class MainActivity extends AppCompatActivity {
     private String userChoosenTask;
     private EditText etName;
     private EditText etAge;
+    Button buttonAdd;
     private ImageView ivImage;
+    Employee employee_One;
+    Bitmap bitmap;
+
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         btnSelect = (Button) findViewById(R.id.btnSelectPhoto);
-        etName=(EditText)findViewById(R.id.etName);
-        String Name=etName.getText().toString();
-        etAge=(EditText)findViewById(R.id.etAge);
-       // String Age=etAge.getText().toString();
-        //int myage=Integer.parseInt(etAge.getText().toString());
+        etName = (EditText) findViewById(R.id.etName);
+        etAge = (EditText) findViewById(R.id.etAge);
+        buttonAdd = (Button) findViewById(R.id.Button_add);
         btnSelect.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
                 selectImage();
             }
         });
+
         ivImage = (ImageView) findViewById(R.id.ivImage);
         DbHelper = new DBHelper(this);
-        Bitmap bitmap=((BitmapDrawable)ivImage.getDrawable()).getBitmap();
-        Employee employee_One = new Employee(bitmap, Name, 25);
-        DbHelper.open();
-        DbHelper.insertEmpDetails(employee_One);
-        Toast.makeText(this,"Reord Inserted in db",Toast.LENGTH_LONG).show();
+        bitmap = ((BitmapDrawable) ivImage.getDrawable()).getBitmap();
+        addData();
         DbHelper.close();
-        employee_One = null;
-        DbHelper.open();
-        employee_One = DbHelper.retriveEmpDetails();
-        DbHelper.close();
-
-       /* TextView empname = (TextView) findViewById(R.id.name);
-        empname.setText(employee_One.getName());
-        ImageView empphoto = (ImageView) findViewById(R.id.photo);
-        empphoto.setImageBitmap(employee_One.getBitmap());
-        TextView empage = (TextView) findViewById(R.id.age);
-        empage.setText("" + employee_One.getAge());*/
-
+        //employee_One = null;
+//        employee_One = DbHelper.retriveEmpDetails();
+        //DbHelper.close();
     }
+
+    public void addData() {
+        buttonAdd.setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        employee_One = new Employee(bitmap, etName.getText().toString(), etAge.getText().toString());
+                        boolean isInserted = DbHelper.insertEmpDetails(employee_One);
+                        if (isInserted == true)
+                            Toast.makeText(MainActivity.this, "Data Inserted", Toast.LENGTH_LONG).show();
+                        else
+                            Toast.makeText(MainActivity.this, "Data Not Inserted", Toast.LENGTH_LONG).show();
+                    }
+                }
+        );
+    }
+
+
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         switch (requestCode) {
             case ImageUtility.MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if(userChoosenTask.equals("Take Photo"))
+                    if (userChoosenTask.equals("Take Photo"))
                         cameraIntent();
-                    else if(userChoosenTask.equals("Choose from Library"))
+                    else if (userChoosenTask.equals("Choose from Library"))
                         galleryIntent();
                 } else {
                     //code for deny
@@ -83,25 +91,26 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
     }
+
     private void selectImage() {
-        final CharSequence[] items = { "Take Photo", "Choose from Library",
-                "Cancel" };
+        final CharSequence[] items = {"Take Photo", "Choose from Library",
+                "Cancel"};
 
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         builder.setTitle("Add Photo!");
         builder.setItems(items, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int item) {
-                boolean result=ImageUtility.checkPermission(MainActivity.this);
+                boolean result = ImageUtility.checkPermission(MainActivity.this);
 
                 if (items[item].equals("Take Photo")) {
-                    userChoosenTask ="Take Photo";
-                    if(result)
+                    userChoosenTask = "Take Photo";
+                    if (result)
                         cameraIntent();
 
                 } else if (items[item].equals("Choose from Library")) {
-                    userChoosenTask ="Choose from Library";
-                    if(result)
+                    userChoosenTask = "Choose from Library";
+                    if (result)
                         galleryIntent();
 
                 } else if (items[item].equals("Cancel")) {
@@ -112,16 +121,14 @@ public class MainActivity extends AppCompatActivity {
         builder.show();
     }
 
-    private void galleryIntent()
-    {
+    private void galleryIntent() {
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);//
-        startActivityForResult(Intent.createChooser(intent, "Select File"),SELECT_FILE);
+        startActivityForResult(Intent.createChooser(intent, "Select File"), SELECT_FILE);
     }
 
-    private void cameraIntent()
-    {
+    private void cameraIntent() {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         startActivityForResult(intent, REQUEST_CAMERA);
     }
@@ -164,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
     @SuppressWarnings("deprecation")
     private void onSelectFromGalleryResult(Intent data) {
 
-        Bitmap bm=null;
+        Bitmap bm = null;
         if (data != null) {
             try {
                 bm = MediaStore.Images.Media.getBitmap(getApplicationContext().getContentResolver(), data.getData());
